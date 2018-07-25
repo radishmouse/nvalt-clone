@@ -13,9 +13,9 @@ class App extends React.Component {
       searchString: '',
       currentDocumentId: -1,
       documents: [
-        {id: 111, title: 'foo', content: 'hey'},
-        {id: 112, title: 'bar', content: 'there'},
-        {id: 113, title: 'baz', content: 'fool'}
+        // {id: 111, title: 'foo', content: 'hey'},
+        // {id: 112, title: 'bar', content: 'there'},
+        // {id: 113, title: 'baz', content: 'fool'}
       ]
     };
   }
@@ -23,10 +23,12 @@ class App extends React.Component {
   render() {
     return (
       <div className="App">
+        <button onClick={this._loadAppData}>Load</button>
+        <button onClick={this._saveAppData}>Save</button>        
         <SearchBar
           title={this._documentById(this.state.currentDocumentId).title}
           handleSearchInput={this._changeSearchString}
-          handleSubmit={this._createAndSelectDocument}
+          handleSubmit={this._selectOrCreate}
           value={this.state.searchString}
           />
         <DocumentList
@@ -39,6 +41,10 @@ class App extends React.Component {
           />
       </div>
     );
+  }
+
+  componentDidMount() {
+    this._loadAppData();
   }
 
   _documentById = (id) => this.state.documents.find(d => id === d.id) || this._blankDocument()
@@ -66,7 +72,20 @@ class App extends React.Component {
     });
   }
 
-  _createAndSelectDocument = () => {}
+  _selectOrCreate = (newTitle) => {
+    // First, see if they were trying to match a document
+    let matchedDocs = this._documentsBySearch();
+    if (matchedDocs.length > 0) {
+      this._selectDocument(matchedDocs[0].id);
+    } else {
+      let newDoc = this._newDocument(newTitle);
+      this.setState({
+        currentDocumentId: newDoc.id,
+        searchString: '',
+        documents: this.state.documents.concat(newDoc)
+      });      
+    }
+  }
   
   _selectDocument = (id) => {
     this.setState({
@@ -77,6 +96,10 @@ class App extends React.Component {
   _allDocumentsExcept = (id) => this.state.documents.filter(d => id !== d.id)
 
   _changeDocument = (content) => {
+    if (this.state.currentDocumentId === -1) {
+      // Bail if they haven't selected a document
+      return;
+    }
     let doc = this._documentById(this.state.currentDocumentId);
     this.setState({
       documents: [
@@ -88,6 +111,14 @@ class App extends React.Component {
       ]
     });
   }
+
+  _saveAppData = () => localStorage.setItem('react-notes-app', JSON.stringify(this.state))
+
+  _loadAppData = () => {
+    let savedState = JSON.parse(localStorage.getItem('react-notes-app'));
+    this.setState(savedState);
+  }
+  
 }
 
 export default App;
