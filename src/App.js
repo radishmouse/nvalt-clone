@@ -10,6 +10,7 @@ class App extends React.Component {
     super(props);
 
     this.state = {
+      searchString: '',
       currentDocumentId: -1,
       documents: [
         {id: 111, title: 'foo', content: 'hey'},
@@ -24,11 +25,12 @@ class App extends React.Component {
       <div className="App">
         <SearchBar
           title={this._documentById(this.state.currentDocumentId).title}
-          handleSearchInput={this._searchDocuments}
+          handleSearchInput={this._changeSearchString}
           handleSubmit={this._createAndSelectDocument}
+          value={this.state.searchString}
           />
         <DocumentList
-          documents={this.state.documents}
+          documents={this._documentsBySearch()}
           handleDocumentSelection={this._selectDocument}
           />
         <DocumentEditor
@@ -49,7 +51,20 @@ class App extends React.Component {
     content: ''
   })
 
-  _searchDocuments = () => {}
+  _documentsBySearch = () => this.state.searchString !== '' ?
+    this.state.documents.filter(d => (
+      d.title.toLowerCase().includes(this.state.searchString.toLowerCase())
+        ||
+      d.content.toLowerCase().includes(this.state.searchString.toLowerCase())    
+    ))
+    :
+    this.state.documents
+
+  _changeSearchString = (val) => {
+    this.setState({
+      searchString: val
+    });
+  }
 
   _createAndSelectDocument = () => {}
   

@@ -5,8 +5,8 @@ const SearchBar = (props) => {
     <div>
       <input
         type="text"
-        value={props.title}
-        onChange={props.handleSearchInput}
+        value={props.value}
+        onChange={(e) => props.handleSearchInput(e.target.value)}
         />
     </div>
   );
